@@ -4,18 +4,18 @@
 package com.object.similary;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
-
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 义原
- * 
- * @author Yingqiang Wu
- * @version 1.0
+ * 义原及义原距离
+ * @author DaiYuQin
+ *
  */
 public class Primitive {
     /**
@@ -34,6 +34,9 @@ public class Primitive {
         String line = null;
 
         try {
+//        	FileInputStream fileInputStream = new FileInputStream("dict/WHOLE.DAT");
+//			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+//			  BufferedReader reader = new BufferedReader(inputStreamReader);
             BufferedReader reader = new BufferedReader(new FileReader(
                     "dict/WHOLE.DAT"));
             line = reader.readLine();

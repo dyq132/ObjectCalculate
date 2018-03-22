@@ -10,10 +10,9 @@ import java.util.Map;
 
 
 /**
- * 代表一个词
+ * 根据《知网》得到的词的各个属性
+ * @author DaiYuQin
  *
- * @author Yingqiang Wu
- * @version 1.0
  */
 public class Word {
     private String word;

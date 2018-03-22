@@ -1,6 +1,7 @@
 package com.object.contex;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,6 +12,11 @@ import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 
 import com.object.similary.WordSimilarity;
 
+/**
+ * 计算两个语句的相似度
+ * @author DaiYuQin
+ *
+ */
 public class Calculate {
 
 	public void calWord(ArrayList<HaWord> words1,ArrayList<HaWord> words2){
@@ -28,13 +34,17 @@ public class Calculate {
 //	    	}
 //	    }
 	    System.out.println("句子1：");
+	    arrange(words1);
 	    ArrayList<WeightWord> weightWords1 = arrangeWord(words1);
-	    for(int i = 0;i<weightWords1.size();i++){
-	    	System.out.println("关键词："+weightWords1.get(i).getWord()+"--权重："+weightWords1.get(i).getWeight());
-	    }
-	    System.out.println("句子2：");
-//	    ArrayList<WeightWord> weightWords2 = arrangeWord(words2);
-	    calcuSimilary(weightWords1, words2);
+//	    for(int i = 0;i<weightWords1.size();i++){
+//	    	System.out.println("关键词："+weightWords1.get(i).getWord()+"--权重："+weightWords1.get(i).getWeight());
+//	    }
+//	    System.out.println("句子2：");
+////	    ArrayList<WeightWord> weightWords2 = arrangeWord(words2);
+//	    for(int i = 0;i<words2.size();i++){
+//	    	System.out.println("句子2："+words2.get(i).getPartContex());
+//	    }
+//	    calcuSimilary(weightWords1, words2);
 	}
 	
 	public void calcuSimilary(ArrayList<WeightWord> weightWords1,ArrayList<HaWord> Words2){
@@ -42,11 +52,18 @@ public class Calculate {
 		for(int i = 0;i<weightWords1.size();i++){
 			ArrayList<Double> simarr = new ArrayList<>();
 			for(int j = 0;j<Words2.size();j++){
-				double sim = WordSimilarity.simWord(weightWords1.get(i).getWord(), Words2.get(j).getPartContex());
+				double sim = 0;
+				if(weightWords1.get(i).getWord().equals(Words2.get(j).getPartContex())){
+					sim =1;
+				}else{
+					sim = WordSimilarity.simWord(weightWords1.get(i).getWord(), Words2.get(j).getPartContex());
+				}
+				System.out.println(weightWords1.get(i).getWord()+"--"+Words2.get(j).getPartContex()+":"+sim);
 				simarr.add(sim);
 			}
-			System.out.println("相似度最大值："+maxSim(simarr)+"--权重"+weightWords1.get(i).getWeight()
-					+"--关键词"+weightWords1.get(i).getWord());
+			System.out.println("关键词："+weightWords1.get(i).getWord()+maxSim(simarr));
+//			System.out.println("相似度最大值："+maxSim(simarr)+"--权重"+weightWords1.get(i).getWeight()
+//					+"--关键词"+weightWords1.get(i).getWord());
 			allsim = allsim+maxSim(simarr)*weightWords1.get(i).getWeight();
 		}
 		System.out.println("句子1和句子2的相似度为="+allsim/weightWords1.size());
@@ -62,6 +79,94 @@ public class Calculate {
 	}
 	
 	/**
+	 * 去除句中标点、辅助词、介词、连词
+	 * @param words
+	 * @return
+	 */
+	public ArrayList<HaWord> arrange(ArrayList<HaWord> words){
+		ArrayList<HaWord> tempwords = new ArrayList<>();
+		for(int i = 0;i<words.size();i++)
+			tempwords.add(words.get(i));
+		ArrayList<Integer> specialIndex = new ArrayList<>();
+		for(int i = 0;i<tempwords.size();i++){
+			String flg = tempwords.get(i).getWordCharater();
+			if(flg.equals("wp")||flg.equals("c")||flg.equals("p")||flg.equals("u")){
+				specialIndex.add(i);
+			}
+		}
+		for(int i = 0;i<tempwords.size();i++){
+			String flg = tempwords.get(i).getWordCharater();
+			if(flg.equals("wp")||flg.equals("c")||flg.equals("p")||flg.equals("u")){
+				tempwords.remove(i);
+			}
+		}
+		for(int i = 0;i<tempwords.size();i++){
+			for(Integer key:tempwords.get(i).getSynstatic().keySet()){
+				if(key<specialIndex.get(0)){
+					
+				}else{
+					for(int j = 0;j<specialIndex.size();j++){
+						if(specialIndex.get(j)>=key){
+							Map<Integer,String> synparent = new HashMap();
+							synparent.put(key-j, tempwords.get(i).getSynstatic().get(key));
+							tempwords.get(i).setSynstatic(synparent);
+							break;
+						}
+					}
+				}
+			}
+		}
+		arrangeWeight(tempwords);
+		return tempwords;
+
+	}
+	/**
+	 * 分配权重
+	 * @param words
+	 */
+	public void arrangeWeight(ArrayList<HaWord> words){
+		ArrayList<Integer> edge = new ArrayList<>();//存储每个节点所包含的边数
+		int sum = 0;
+		for(int i = 0;i<words.size();i++){
+			int countedge = 0;
+			for(int j = 0;j<words.size();j++){	
+			for(Integer key:words.get(j).getSynstatic().keySet()){
+				if(i==key)
+					countedge++;		
+			}
+			}
+			for(Integer key:words.get(i).getSynstatic().keySet()){
+				if(key>=0){
+					edge.add(countedge+1);
+					sum = sum+countedge+1;
+				}
+				else{ 
+					edge.add(countedge);
+					sum = sum +countedge;
+				}
+			}
+//			System.out.println("分词："+tempwords.get(i).getPartContex()+":parent:"+key);
+		}
+//		System.out.println("sum:"+sum);
+		ArrayList<WeightWord> weightWords = new ArrayList<>();
+		for(int i = 0;i<words.size();i++){
+			WeightWord weightWord = new WeightWord();
+			weightWord.word = words.get(i).getPartContex();
+			weightWord.weight = (double)edge.get(i)/(double)sum;
+			weightWords.add(weightWord);
+//			System.out.println(edge.get(i));
+		}
+		double haha = 0.0;
+		for(int i = 0;i<weightWords.size();i++){
+//			System.out.println(weightWords.get(i).getWord()+"--"+weightWords.get(i).getWeight());
+			haha = haha+weightWords.get(i).getWeight();
+		}
+	
+		
+	}
+	
+	
+	/**
 	 * 整理一个句子
 	 */
 	public ArrayList<WeightWord> arrangeWord(ArrayList<HaWord> words){
@@ -69,11 +174,11 @@ public class Calculate {
 	    int root = creatroot(words,nodes);
 	    pruning(nodes,words,root);
 	    allEdge(nodes.get(root));
-		System.out.println("total="+total);
+//		System.out.println("total="+total);
 		double sum = 0.0;
 		for(int i = 0;i<nodes.size();i++){
 			if(nodes.get(i).getVar()!=null){
-			System.out.println("整理句子："+nodes.get(i).getVar()+"--"+nodes.get(i).getEdge());
+//			System.out.println("整理句子："+nodes.get(i).getVar()+"--"+nodes.get(i).getEdge());
 			nodes.get(i).edge = nodes.get(i).getEdge()/total;
 			sum = sum + nodes.get(i).getEdge();
 			}
@@ -81,10 +186,10 @@ public class Calculate {
 		for(int i = 0;i<nodes.size();i++){
 			if(nodes.get(i).getVar()!=null){
 			nodes.get(i).edge = (1/sum)*nodes.get(i).getEdge(); 
-			System.out.println("化简之后："+nodes.get(i).getVar()+"--"+nodes.get(i).getEdge());
+//			System.out.println("化简之后："+nodes.get(i).getVar()+"--"+nodes.get(i).getEdge());
 			}
 		}
-		print(nodes.get(root));
+//		print(nodes.get(root));
 		ArrayList<WeightWord> weightWords = new ArrayList<>();
 		turnWWord(nodes, weightWords);
 		return weightWords;
@@ -104,10 +209,10 @@ public class Calculate {
 			weightWords.add(weightWord);
 			}
 		}
-		System.out.println("转换：");
-		for(int i = 0;i<weightWords.size();i++){
-			System.out.println(weightWords.get(i).getWord()+"=="+weightWords.get(i).getWeight());
-		}
+//		System.out.println("转换：");
+//		for(int i = 0;i<weightWords.size();i++){
+//			System.out.println(weightWords.get(i).getWord()+"=="+weightWords.get(i).getWeight());
+//		}
 		for(int i = 0;i<weightWords.size();i++){
 			for(int j = i+1;j<weightWords.size();j++){
 				if(weightWords.get(i).getWord().equals(weightWords.get(j).getWord())){
@@ -116,32 +221,12 @@ public class Calculate {
 				}
 			}
 		}
-		System.out.println("精简：");
-		for(int i = 0;i<weightWords.size();i++){
-			System.out.println(weightWords.get(i).getWord()+"=="+weightWords.get(i).getWeight());
-		}
+//		System.out.println("精简：");
+//		for(int i = 0;i<weightWords.size();i++){
+//			System.out.println(weightWords.get(i).getWord()+"=="+weightWords.get(i).getWeight());
+//		}
 	}
 	
-//	public void deletewods(ArrayList<HaWord> words){
-//		for(int i = 0;i<words.size();i++){
-//			String flag = words.get(i).getWordCharater();
-//			if(flag.equals("wp")||flag.equals("u")){
-//				
-//				words.remove(i);
-//				
-//				for(int j = i;j<words.size();j++){
-//					Map<Integer, String> map = words.get(j).getSynstatic();
-//					for(Integer key:map.keySet()){
-//						map.put(key-1, map.get(key));
-//						map.remove(key);
-//		        	}
-//				}
-//			
-//			}
-//		}
-//		System.out.println("创建树：");
-//		creatroot(words);
-//	}
 	
 	/**
 	 * 创建树
@@ -202,7 +287,7 @@ public class Calculate {
 //			if(flg.equals("wp")){
 //				nodes.get(i).var = null;
 //			}
-			if(flg.equals("u")||flg.equals("wp")||flg.equals("p")){
+			if(flg.equals("u")||flg.equals("wp")||flg.equals("p")||flg.equals("c")){
 				if(nodes.get(i).left==null)
 				nodes.get(i).var = null;
 				else{

@@ -3,6 +3,11 @@ package com.object.contex;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * 根据哈工大接口得到词的属性
+ * @author DaiYuQin
+ *
+ */
 public class HaWord {
 	private String partContex;//分词内容cont
 	private String wordCharater;//词性pos

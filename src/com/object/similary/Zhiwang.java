@@ -1,102 +1,126 @@
-/*
- * Copyright (C) 2008 SKLSDE(State Key Laboratory of Software Development and Environment, Beihang University)., All Rights Reserved.
- */
-package edu.buaa.edu.wordsimilarity;
+package com.object.similary;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * ¸ÃÀàÎª´ËÏîÄ¿µÄÖ÷ÒªÎÄ¼ş£¬Ìá¹©¼ÆËã´ÊÓïÏàËÆ¶ÈµÄÒ»Ğ©»ù±¾¹«Ê½£¬¶¼Îª¾²Ì¬¡£
- * ´ËÀàÏß³Ì°²È«£¬¿ÉÒÔ¶àÏß³Ìµ÷ÓÃ¡£
- * ¾ßÌåËã·¨²Î¿¼ÂÛÎÄ£º ¡¶»ùÓÚ£¼ÖªÍø£¾µÄ´Ê»ãÓïÒåÏàËÆ¶È¼ÆËã¡·ÂÛÎÄ.pdf
- * @author Yingqiang Wu
- * @version 1.0
+ * ç ”ç©¶çŸ¥ç½‘ç›¸ä¼¼åº¦è®¡ç®—çš„æµ‹è¯•ä¾‹å­
+ * @author DaiYuQin
+ *
  */
-public class WordSimilarity {
-    // ´Ê¿âÖĞËùÓĞµÄ¾ßÌå´Ê£¬»òÕßÒåÔ­
+public class Zhiwang {
+
+//	private static int keyWordLen = 60;//æ¦‚å¿µ  çš„æœ€å¤§é•¿åº¦
+//	private static int POSLen = 8;//è¯æ€§ çš„æœ€å¤§é•¿åº¦
+//	private int SememeSetLen = 200;//ä¸€ä¸ªâ€œæ¦‚å¿µâ€å¯¹åº”çš„"ä¹‰åŸ"é›†åˆçš„æœ€å¤§é•¿åº¦
+//	 public static void loadGlossary() {
+//	        String line = null;
+//	        BufferedReader reader = null;
+//	        try {
+//	            reader = new BufferedReader(new FileReader("././dict/glossary.dat"));
+//	            line = reader.readLine();
+//	            while (line != null) {
+//	            	
+//	            }
+//	        }catch (Exception e){
+//	        	
+//	        }
+// }
+	
+	
+	 // è¯åº“ä¸­æ‰€æœ‰çš„å…·ä½“è¯ï¼Œæˆ–è€…ä¹‰åŸ
     private static Map<String, List<Word>> ALLWORDS = new HashMap<String, List<Word>>();
     /**
      * sim(p1,p2) = alpha/(d+alpha)
      */
     private static double alpha = 1.6;
     /**
-     * ¼ÆËãÊµ´ÊµÄÏàËÆ¶È£¬²ÎÊı£¬»ù±¾ÒåÔ­È¨ÖØ
+     * è®¡ç®—å®è¯çš„ç›¸ä¼¼åº¦ï¼Œå‚æ•°ï¼ŒåŸºæœ¬ä¹‰åŸæƒé‡
      */
     private static double beta1 = 0.5;
     /**
-     * ¼ÆËãÊµ´ÊµÄÏàËÆ¶È£¬²ÎÊı£¬ÆäËûÒåÔ­È¨ÖØ
+     * è®¡ç®—å®è¯çš„ç›¸ä¼¼åº¦ï¼Œå‚æ•°ï¼Œå…¶ä»–ä¹‰åŸæƒé‡
      */
     private static double beta2 = 0.2;
     /**
-     * ¼ÆËãÊµ´ÊµÄÏàËÆ¶È£¬²ÎÊı£¬¹ØÏµÒåÔ­È¨ÖØ
+     * è®¡ç®—å®è¯çš„ç›¸ä¼¼åº¦ï¼Œå‚æ•°ï¼Œå…³ç³»ä¹‰åŸæƒé‡
      */
     private static double beta3 = 0.17;
     /**
-     * ¼ÆËãÊµ´ÊµÄÏàËÆ¶È£¬²ÎÊı£¬¹ØÏµ·ûºÅÒåÔ­È¨ÖØ
+     * è®¡ç®—å®è¯çš„ç›¸ä¼¼åº¦ï¼Œå‚æ•°ï¼Œå…³ç³»ç¬¦å·ä¹‰åŸæƒé‡
      */
     private static double beta4 = 0.13;
     /**
-     * ¾ßÌå´ÊÓëÒåÔ­µÄÏàËÆ¶ÈÒ»ÂÉ´¦ÀíÎªÒ»¸ö±È½ÏĞ¡µÄ³£Êı. ¾ßÌå´ÊºÍ¾ßÌå´ÊµÄÏàËÆ¶È£¬Èç¹ûÁ½¸ö´ÊÏàÍ¬£¬ÔòÎª1£¬·ñÔòÎª0.
+     * å…·ä½“è¯ä¸ä¹‰åŸçš„ç›¸ä¼¼åº¦ä¸€å¾‹å¤„ç†ä¸ºä¸€ä¸ªæ¯”è¾ƒå°çš„å¸¸æ•°. å…·ä½“è¯å’Œå…·ä½“è¯çš„ç›¸ä¼¼åº¦ï¼Œå¦‚æœä¸¤ä¸ªè¯ç›¸åŒï¼Œåˆ™ä¸º1ï¼Œå¦åˆ™ä¸º0.
      */
     private static double gamma = 0.2;
     /**
-     * ½«ÈÎÒ»·Ç¿ÕÖµÓë¿ÕÖµµÄÏàËÆ¶È¶¨ÒåÎªÒ»¸ö±È½ÏĞ¡µÄ³£Êı
+     * å°†ä»»ä¸€éç©ºå€¼ä¸ç©ºå€¼çš„ç›¸ä¼¼åº¦å®šä¹‰ä¸ºä¸€ä¸ªæ¯”è¾ƒå°çš„å¸¸æ•°
      */
     private static double delta = 0.2;
     /**
-     * Á½¸öÎŞ¹ØÒåÔ­Ö®¼äµÄÄ¬ÈÏ¾àÀë
+     * ä¸¤ä¸ªæ— å…³ä¹‰åŸä¹‹é—´çš„é»˜è®¤è·ç¦»
      */
     private static int DEFAULT_PRIMITIVE_DIS = 20;
     /**
-     * ÖªÍøÖĞµÄÂß¼­·ûºÅ
+     * çŸ¥ç½‘ä¸­çš„é€»è¾‘ç¬¦å·
      */
     private static String LOGICAL_SYMBOL = ",~^";
     /**
-     * ÖªÍøÖĞµÄ¹ØÏµ·ûºÅ
+     * çŸ¥ç½‘ä¸­çš„å…³ç³»ç¬¦å·
      */
     private static String RELATIONAL_SYMBOL = "#%$*+&@?!";
     /**
-     * ÖªÍøÖĞµÄÌØÊâ·ûºÅ£¬Ğé´Ê£¬»ò¾ßÌå´Ê
+     * çŸ¥ç½‘ä¸­çš„ç‰¹æ®Šç¬¦å·ï¼Œè™šè¯ï¼Œæˆ–å…·ä½“è¯
      */
-    private static String SPECIAL_SYMBOL = "{";
+    private static String SPECIAL_SYMBOL = "{}()[]";
     /**
-     * Ä¬ÈÏ¼ÓÔØÎÄ¼ş
+     * é»˜è®¤åŠ è½½æ–‡ä»¶
      */
     static {
         loadGlossary();
     }
 
     /**
-     * ¼ÓÔØ glossay.dat ÎÄ¼ş
+     * åŠ è½½ glossay.dat æ–‡ä»¶
      */
     public static void loadGlossary() {
         String line = null;
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader("dict/glossary.dat"));
+        	FileInputStream fileInputStream = new FileInputStream("dict/test .dat");
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+			reader = new BufferedReader(inputStreamReader);
+//            reader = new BufferedReader(InputStreamReader(new FileInputStream
+//            		("D:\\android\\workspace\\ObjectCulate\\dict\\test .dat"),"UTF-8"));
             line = reader.readLine();
             while (line != null) {
                 // parse the line
                 // the line format is like this:
-                // °¢²¼Ôú±È N place|µØ·½,capital|¹ú¶¼,ProperName|×¨,(the United Arab Emirates|°¢À­²®ÁªºÏÇõ³¤¹ú)
+                // é˜¿å¸ƒæ‰æ¯” N place|åœ°æ–¹,capital|å›½éƒ½,ProperName|ä¸“,(the United Arab Emirates|é˜¿æ‹‰ä¼¯è”åˆé…‹é•¿å›½)
                 line = line.trim().replaceAll("\\s+", " ");
+//                System.out.println("line:"+line.toString());
                 String[] strs = line.split(" ");
                 String word = strs[0];
+//                System.out.println("word:"+word);
                 String type = strs[1];
-                // ÒòÎªÊÇ°´¿Õ¸ñ»®·Ö£¬×îºóÒ»²¿·ÖµÄ¼Ó»ØÈ¥
+//                System.out.println("type:"+type);
+                // å› ä¸ºæ˜¯æŒ‰ç©ºæ ¼åˆ’åˆ†ï¼Œæœ€åä¸€éƒ¨åˆ†çš„åŠ å›å»
                 String related = strs[2];
+//                System.out.println("related:"+related);
+//                System.out.println("strçš„å¤§å°"+strs.length);
+                //é˜²æ­¢å‡ºç°è¯­ä¹‰ä¸­æœ‰ç©ºæ ¼çš„æƒ…å†µï¼Œå¦‚ï¼š(be a prostitute|å–æ·«)
                 for (int i = 3; i < strs.length; i++) {
                     related += (" " + strs[i]);
                 }
+//                System.out.println("æ”¹å˜è¿‡çš„related:"+related);
                 // Create a new word
                 Word w = new Word();
                 w.setWord(word);
@@ -119,10 +143,13 @@ public class WordSimilarity {
                 e.printStackTrace();
             }
         }
+      
     }
-
+    
+    
+  
     /**
-     * ½âÎö¾ßÌå¸ÅÄî²¿·Ö£¬½«½âÎöµÄ½á¹û´æÈë<code>Word word</code>.
+     * è§£æå…·ä½“æ¦‚å¿µéƒ¨åˆ†ï¼Œå°†è§£æçš„ç»“æœå­˜å…¥<code>Word word</code>.
      * 
      * @param related
      */
@@ -136,26 +163,29 @@ public class WordSimilarity {
         String relationalPrimitiveKey = null;
         String simbolKey = null;
         for (int i = 0; i < parts.length; i++) {
-            // Èç¹ûÊÇ¾ßÌå´Ê£¬ÔòÒÔÀ¨ºÅ¿ªÊ¼ºÍ½áÎ²: (Bahrain|°ÍÁÖ)
+            // å¦‚æœæ˜¯å…·ä½“è¯ï¼Œåˆ™ä»¥æ‹¬å·å¼€å§‹å’Œç»“å°¾: (Bahrain|å·´æ—)
             if (parts[i].startsWith("(")) {
                 parts[i] = parts[i].substring(1, parts[i].length() - 1);
+//                System.out.println("ä»¥æ‹¬å·å¼€å§‹çš„ï¼š"+parts[i]);
                 // parts[i] = parts[i].replaceAll("\\s+", "");
             }
-            // ¹ØÏµÒåÔ­£¬Ö®ºóµÄ¶¼ÊÇ¹ØÏµÒåÔ­
+            // å…³ç³»ä¹‰åŸï¼Œä¹‹åçš„éƒ½æ˜¯å…³ç³»ä¹‰åŸ
             if (parts[i].contains("=")) {
                 isRelational = true;
-                // format: content=fact|ÊÂÇé
+                // format: content=fact|äº‹æƒ…
                 String[] strs = parts[i].split("=");
                 relationalPrimitiveKey = strs[0];
                 String value = strs[1].split("\\|")[1];
+//                System.out.println("å…³ç³»ä¹‰åŸï¼škey:"+strs[0]+"value:"+value);
                 word.addRelationalPrimitive(relationalPrimitiveKey, value);
 
                 continue;
             }
             String[] strs = parts[i].split("\\|");
-            // ¿ªÊ¼µÄµÚÒ»¸ö×Ö·û£¬È·¶¨ÊÇ·ñÎªÒåÔ­£¬»òÊÇÆäËû¹ØÏµ¡£
+//            System.out.println("strsçš„å¤§å°ï¼š"+strs.length+"str[0]"+strs[0]);
+            // å¼€å§‹çš„ç¬¬ä¸€ä¸ªå­—ç¬¦ï¼Œç¡®å®šæ˜¯å¦ä¸ºä¹‰åŸï¼Œæˆ–æ˜¯å…¶ä»–å…³ç³»ã€‚
             int type = getPrimitiveType(strs[0]);
-            // ÆäÖĞÖĞÎÄ²¿·ÖµÄ´ÊÓï,²¿·ÖĞé´ÊÃ»ÓĞÖĞÎÄ½âÊÍ
+            // å…¶ä¸­ä¸­æ–‡éƒ¨åˆ†çš„è¯è¯­,éƒ¨åˆ†è™šè¯æ²¡æœ‰ä¸­æ–‡è§£é‡Š
             if (strs.length > 1) {
                 chinese = strs[1];
             }
@@ -163,15 +193,15 @@ public class WordSimilarity {
                     && (chinese.endsWith(")") || chinese.endsWith("}"))) {
                 chinese = chinese.substring(0, chinese.length() - 1);
             }
-            // ÒåÔ­
+            // ä¹‰åŸ
             if (type == 0) {
-                // Ö®Ç°ÓĞÒ»¸ö¹ØÏµÒåÔ­
+                // ä¹‹å‰æœ‰ä¸€ä¸ªå…³ç³»ä¹‰åŸ
                 if (isRelational) {
                     word.addRelationalPrimitive(relationalPrimitiveKey,
                                     chinese);
                     continue;
                 }
-                // Ö®Ç°ÓĞÒ»¸öÊÇ·ûºÅÒåÔ­
+                // ä¹‹å‰æœ‰ä¸€ä¸ªæ˜¯ç¬¦å·ä¹‰åŸ
                 if (isSimbol) {
                     word.addRelationSimbolPrimitive(simbolKey, chinese);
                     continue;
@@ -185,25 +215,28 @@ public class WordSimilarity {
                     continue;
                 }
             }
-            // ¹ØÏµ·ûºÅ±í
+            // å…³ç³»ç¬¦å·è¡¨
             if (type == 1) {
                 isSimbol = true;
                 isRelational = false;
                 simbolKey = Character.toString(strs[0].charAt(0));
+//                System.out.println("å…³ç³»ç¬¦å·ä¹‰åŸï¼š"+simbolKey+"--"+chinese);
                 word.addRelationSimbolPrimitive(simbolKey, chinese);
                 continue;
             }
             if (type == 2) {
-                // Ğé´Ê
+                // è™šè¯
                 if (strs[0].startsWith("{")) {
-                    // È¥µô¿ªÊ¼µÚÒ»¸ö×Ö·û "{"
+                    // å»æ‰å¼€å§‹ç¬¬ä¸€ä¸ªå­—ç¬¦ "{"
                     String english = strs[0].substring(1);
-                    // È¥µôÓĞ°ë²¿·Ö "}"
+//                    System.out.println("english:"+english);
+                    // å»æ‰æœ‰åŠéƒ¨åˆ† "}"
                     if (chinese != null) {
+//                    	System.out.println("chinese:"+chinese);
                         word.addStructruralWord(chinese);
                         continue;
                     } else {
-                        // Èç¹ûÃ»ÓĞÖĞÎÄ²¿·Ö£¬ÔòÊ¹ÓÃÓ¢ÎÄ´Ê
+                        // å¦‚æœæ²¡æœ‰ä¸­æ–‡éƒ¨åˆ†ï¼Œåˆ™ä½¿ç”¨è‹±æ–‡è¯
                         word.addStructruralWord(english);
                         continue;
                     }
@@ -211,17 +244,34 @@ public class WordSimilarity {
             }
         }
     }
-
+    
+    /**
+     * åŠ å…¥ä¸€ä¸ªè¯è¯­
+     * 
+     * @param word
+     */
+    public static void addWord(Word word) {
+        List<Word> list = ALLWORDS.get(word.getWord());
+//        System.out.println("word:"+word.getWord());
+        if (list == null) {
+            list = new ArrayList<Word>();
+            list.add(word);
+            ALLWORDS.put(word.getWord(), list);
+        } else {
+            list.add(word);
+        }
+    }
+    
     /**
      * <p>
-     * ´ÓÓ¢ÎÄ²¿·ÖÈ·¶¨Õâ¸öÒåÔ­µÄÀà±ğ¡£
+     * ä»è‹±æ–‡éƒ¨åˆ†ç¡®å®šè¿™ä¸ªä¹‰åŸçš„ç±»åˆ«ã€‚
      * </p>
      * <p>
      * 0-----Primitive<br/> 1-----Relational<br/> 2-----Special
      * </p>
      * 
      * @param english
-     * @return Ò»¸ö´ú±íÀà±ğµÄÕûÊı£¬ÆäÖµÎª1£¬2£¬3¡£
+     * @return ä¸€ä¸ªä»£è¡¨ç±»åˆ«çš„æ•´æ•°ï¼Œå…¶å€¼ä¸º1ï¼Œ2ï¼Œ3ã€‚
      */
     public static int getPrimitiveType(String str) {
         String first = Character.toString(str.charAt(0));
@@ -233,86 +283,97 @@ public class WordSimilarity {
         }
         return 0;
     }
-
+    
+    
     /**
-     * ¼ÆËãÁ½¸ö´ÊÓïµÄÏàËÆ¶È
+     * è®¡ç®—ä¸¤ä¸ªè¯è¯­çš„ç›¸ä¼¼åº¦
      */
     public static double simWord(String word1, String word2) {
         if (ALLWORDS.containsKey(word1) && ALLWORDS.containsKey(word2)) {
             List<Word> list1 = ALLWORDS.get(word1);
             List<Word> list2 = ALLWORDS.get(word2);
+            
             double max = 0;
+
             for (Word w1 : list1) {
                 for (Word w2 : list2) {
-                    double sim = simWord(w1, w2);
+                    double sim = simWord(w1, w2);;
                     max = (sim > max) ? sim : max;
                 }
             }
             return max;
+      
         }
-        //System.out.println("ÆäÖĞÓĞ´ÊÃ»ÓĞ±»ÊÕÂ¼");
+        System.out.println("å…¶ä¸­æœ‰è¯æ²¡æœ‰è¢«æ”¶å½•");
         return -0.0;
     }
 
     /**
-     * ¼ÆËãÁ½¸ö´ÊÓïµÄÏàËÆ¶È
+     * è®¡ç®—ä¸¤ä¸ªè¯è¯­çš„ç›¸ä¼¼åº¦
      * @param w1
      * @param w2
      * @return
      */
     public static double simWord(Word w1, Word w2) {
-        // Ğé´ÊºÍÊµ´ÊµÄÏàËÆ¶ÈÎªÁã
+        // è™šè¯å’Œå®è¯çš„ç›¸ä¼¼åº¦ä¸ºé›¶
         if (w1.isStructruralWord() != w2.isStructruralWord()) {
             return 0;
         }
-        // Ğé´Ê
+        // è™šè¯
         if (w1.isStructruralWord() && w2.isStructruralWord()) {
             List<String> list1 = w1.getStructruralWords();
             List<String> list2 = w2.getStructruralWords();
             return simList(list1, list2);
         }
-        // Êµ´Ê
+        // å®è¯
         if (!w1.isStructruralWord() && !w2.isStructruralWord()) {
-            // Êµ´ÊµÄÏàËÆ¶È·ÖÎª4¸ö²¿·Ö
-            // »ù±¾ÒåÔ­ÏàËÆ¶È
+            // å®è¯çš„ç›¸ä¼¼åº¦åˆ†ä¸º4ä¸ªéƒ¨åˆ†
+            // åŸºæœ¬ä¹‰åŸç›¸ä¼¼åº¦
             String firstPrimitive1 = w1.getFirstPrimitive();
             String firstPrimitive2 = w2.getFirstPrimitive();
+            //è®¡ç®—ä¹‰åŸè·ç¦»
+//            System.out.println("åŸºæœ¬ä¹‰åŸï¼š"+firstPrimitive1+","+firstPrimitive2);
             double sim1 = simPrimitive(firstPrimitive1, firstPrimitive2);
-            //System.out.println("sim1="+sim1);
-            // ÆäËû»ù±¾ÒåÔ­ÏàËÆ¶È
+//            System.out.println("sim1="+sim1);
+            // å…¶ä»–åŸºæœ¬ä¹‰åŸç›¸ä¼¼åº¦
             List<String> list1 = w1.getOtherPrimitives();
             List<String> list2 = w2.getOtherPrimitives();
+           
             double sim2 = simList(list1, list2);
-            System.out.println("sim2="+sim2);
-            // ¹ØÏµÒåÔ­ÏàËÆ¶È
+//            System.out.println("sim2="+sim2);
+            // å…³ç³»ä¹‰åŸç›¸ä¼¼åº¦
             Map<String, List<String>> map1 = w1.getRelationalPrimitives();
             Map<String, List<String>> map2 = w2.getRelationalPrimitives();
             double sim3 = simMap(map1, map2);
-            //System.out.println("sim3="+sim3);
-            // ¹ØÏµ·ûºÅÏàËÆ¶È
+            System.out.println("sim3="+sim3);
+            // å…³ç³»ç¬¦å·ç›¸ä¼¼åº¦
             map1 = w1.getRelationSimbolPrimitives();
             map2 = w2.getRelationSimbolPrimitives();
+//            double sim4 = simMap(map1, map2);
             double sim4 = simMap(map1, map2);
-            //System.out.println("sim4="+sim4);
+//            System.out.println("sim4="+sim4);
             double product = sim1;
             double sum = beta1 * product;
-            System.out.println(sum+"  1");
+//            System.out.println(sum+"  1");
             product *= sim2;
+//            product = sim2;
             sum += beta2 * product;
-            System.out.println(sum+"  2");
+//            System.out.println(sum+"  2");
             product *= sim3;
+//            product = sim3;
             sum += beta3 * product;
-            System.out.println(sum+"  3");
+//            System.out.println(sum+"  3");
             product *= sim4;
+//            product = sim4;
             sum += beta4 * product;
-            System.out.println(sum+"  4");
+//            System.out.println(sum+"  4");
             return sum;
         }
         return 0.0;
     }
 
     /**
-     * mapµÄÏàËÆ¶È¡£
+     * mapçš„ç›¸ä¼¼åº¦ã€‚
      * 
      * @param map1
      * @param map2
@@ -321,7 +382,8 @@ public class WordSimilarity {
     public static double simMap(Map<String, List<String>> map1,
             Map<String, List<String>> map2) {
         if (map1.isEmpty() && map2.isEmpty()) {
-            return 1;
+//            return 0;
+        	return 1;
         }
         int total =map1.size() + map2.size();
         double sim = 0;
@@ -329,7 +391,13 @@ public class WordSimilarity {
         for (String key : map1.keySet()) {
             if (map2.containsKey(key)) {
                 List<String> list1 = map1.get(key);
+//                for(int i = 0;i <list1.size();i++){
+//                	System.out.println("å…³ç³»ä¹‰åŸlist1:"+list1.get(i));
+//                }
                 List<String> list2 = map2.get(key);
+//                for(int i = 0;i <list2.size();i++){
+//                	System.out.println("å…³ç³»ä¹‰åŸlist2:"+list2.get(i));
+//                }
                 sim += simList(list1, list2);
                 count++;
             }
@@ -338,8 +406,11 @@ public class WordSimilarity {
                 / (total-count);
     }
 
+    
+   
+    
     /**
-     * ±È½ÏÁ½¸ö¼¯ºÏµÄÏàËÆ¶È
+     * æ¯”è¾ƒä¸¤ä¸ªé›†åˆçš„ç›¸ä¼¼åº¦
      * 
      * @param list1
      * @param list2
@@ -347,41 +418,34 @@ public class WordSimilarity {
      */
     public static double simList(List<String> list1, List<String> list2) {
         if (list1.isEmpty() && list2.isEmpty()){
-            System.out.println("empty");
         	return 1;
-        }
+        }else{
         int m = list1.size();
         int n = list2.size();
         int big = (m > n) ? m : n;
         int N = (m < n) ? m : n;
         int count = 0;
-        int index1 = 0, index2 = 0;
+//        int index1 = 0, index2 = 0;
         double sum = 0;
-        double max = 0;
+//        double max = 0;
         while (count < N) {
-            max = 0;
+        	double sim = 0;
             for (int i = 0; i < list1.size(); i++) {
                 for (int j = 0; j < list2.size(); j++) {
-                    double sim = innerSimWord(list1.get(i), list2.get(j));
-                    if (sim > max) {
-                        index1 = i;
-                        index2 = j;
-                        max = sim;
-                    }
+                   sim = innerSimWord(list1.get(i), list2.get(j));
                 }
             }
-            sum += max;
-            list1.remove(index1);
-            list2.remove(index2);
+            sum += sim;
+
             count++;
         }
-        double shit = (sum + delta * (big - N)) / big;
-        System.out.println("Shit="+shit);
+        double shit = (sum + delta * (big - N)) / big;   
         return shit;
+        }
     }
 
     /**
-     * ÄÚ²¿±È½ÏÁ½¸ö´Ê£¬¿ÉÄÜÊÇÎª¾ßÌå´Ê£¬Ò²¿ÉÄÜÊÇÒåÔ­
+     * å†…éƒ¨æ¯”è¾ƒä¸¤ä¸ªè¯ï¼Œå¯èƒ½æ˜¯ä¸ºå…·ä½“è¯ï¼Œä¹Ÿå¯èƒ½æ˜¯ä¹‰åŸ
      * 
      * @param word1
      * @param word2
@@ -390,17 +454,17 @@ public class WordSimilarity {
     private static double innerSimWord(String word1, String word2) {
         boolean isPrimitive1 = Primitive.isPrimitive(word1);
         boolean isPrimitive2 = Primitive.isPrimitive(word2);
-        // Á½¸öÒåÔ­
+        // ä¸¤ä¸ªä¹‰åŸ
         if (isPrimitive1 && isPrimitive2)
             return simPrimitive(word1, word2);
-        // ¾ßÌå´Ê
+        // å…·ä½“è¯
         if (!isPrimitive1 && !isPrimitive2) {
             if (word1.equals(word2))
                 return 1;
             else
                 return 0;
         }
-        // ÒåÔ­ºÍ¾ßÌå´ÊµÄÏàËÆ¶È, Ä¬ÈÏÎªgamma=0.2
+        // ä¹‰åŸå’Œå…·ä½“è¯çš„ç›¸ä¼¼åº¦, é»˜è®¤ä¸ºgamma=0.2
         return gamma;
     }
 
@@ -411,11 +475,12 @@ public class WordSimilarity {
      */
     public static double simPrimitive(String primitive1, String primitive2) {
         int dis = disPrimitive(primitive1, primitive2);
+//        System.out.println("dis"+dis);
         return alpha / (dis + alpha);
     }
 
     /**
-     * ¼ÆËãÁ½¸öÒåÔ­Ö®¼äµÄ¾àÀë£¬Èç¹ûÁ½¸öÒåÔ­²ã´ÎÃ»ÓĞ¹²Í¬½Úµã£¬ÔòÉèÖÃËûÃÇµÄ¾àÀëÎª20¡£
+     * è®¡ç®—ä¸¤ä¸ªä¹‰åŸä¹‹é—´çš„è·ç¦»ï¼Œå¦‚æœä¸¤ä¸ªä¹‰åŸå±‚æ¬¡æ²¡æœ‰å…±åŒèŠ‚ç‚¹ï¼Œåˆ™è®¾ç½®ä»–ä»¬çš„è·ç¦»ä¸º20ã€‚
      * 
      * @param primitive1
      * @param primitive2
@@ -434,175 +499,9 @@ public class WordSimilarity {
         return DEFAULT_PRIMITIVE_DIS;
     }
 
-    /**
-     * ¼ÓÈëÒ»¸ö´ÊÓï
-     * 
-     * @param word
-     */
-    public static void addWord(Word word) {
-        List<Word> list = ALLWORDS.get(word.getWord());
-
-        if (list == null) {
-            list = new ArrayList<Word>();
-            list.add(word);
-            ALLWORDS.put(word.getWord(), list);
-        } else {
-            list.add(word);
-        }
-    }
-    
-    //½«Ãû´ÊĞ´Èë¾ØÕó
-    public static String[] wordArr(String fileName){
-    	try{
-    		FileReader f = new FileReader(fileName);
-    		BufferedReader file = new BufferedReader(f);
-    		String tempLine = null;
-    		List<String> n = new ArrayList<String>();
-    		tempLine = file.readLine();
-    		while (tempLine.length()>=1)
-    		{
-    			n.add(tempLine);
-    			tempLine = file.readLine();
-    		}
-    	
-    		String[] none = new String[n.size()];
-    		for (int i=0; i<n.size(); i++)
-    		{
-    			none[i] = n.get(i);
-    			//System.out.println(none[i]);
-    		}
-    		f.close();
-    		return none;
-    	} catch (Exception e){
-    		System.out.println("ERROR!!!");
-    		return null;
-    	}
-    }
-    
-    
-    //¼ÆËãÁ½¸öÎ¢²©µÄÏàËÆ¶È
-    public static double twiSim (double arr[][]){
-    	double maxTemp = 0.0;
-    	double max5 = 0.0;
-    	int maxj = 0, maxk = 0;
-    	for (int i=0; i<5; i++){
-    		for (int j=0; j<arr.length; j++){
-    			for (int k=0; k<arr[j].length; k++){
-    				if (arr[j][k] > maxTemp){
-    					maxTemp = arr[j][k];
-    					maxj = j;
-    					maxk = k;
-    				}
-    			}
-    		}
-    		max5 += maxTemp;
-    		arr[maxj][maxk] = 0.0;
-    		maxTemp = 0.0;
-    	}
-    	double maxavr = max5 / 5;
-    	return maxavr;
-    }
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) throws Exception {
-        // TODO Auto-generated method stub
-    /*    BufferedReader reader = new BufferedReader(new FileReader(
-                "dict/glossary.dat"));
-        Set<String> set = new HashSet<String>();
-        String line = reader.readLine();
-        while (line != null) {
-            // System.out.println(line);
-            line = line.replaceAll("\\s+", " ");
-            String[] strs = line.split(" ");
-            for (int i = 0; i < strs.length; i++) {
-                System.out.print(" " + strs[i]);
-            }
-            System.out.println();
-            set.add(strs[1]);
-            line = reader.readLine();
-        }
-        System.out.println(set.size());
-        for (String name : set) {
-            System.out.println(name);
-        }*/
-        
-    	//wordArr("D:/¾ÛÀà/parse/twi/character"+"/ch1.txt");
-/*    	String wordlist1[][] = new String[20][];
-    	
-    	for (int i=0; i<20; i++){
-    		wordlist1[i] = wordArr("D:/¾ÛÀà/parse/twi/character/ch"+(i+1)+".txt");
-    		System.out.println((i+1)+"has done");
-    	}
-    	
-    	String wordlist2[][] = new String[20][];
-    	
-    	for (int i=0; i<20; i++){
-    		wordlist2[i] = wordArr("D:/¾ÛÀà/parse/twi/character2/ch"+(i+1)+".txt");
-    		System.out.println((i+1)+"has done");
-    	}
-    	
-    	double sim[][][][] = new double [20][20][][];
-    	int j,k,m,n;
- */   	
-    	//Í¬Ò»Àà±ğÄÚÏàËÆ¶È¼ÆËã
-    /*	for (j=0; j<20; j++){
-    		for (k=j+1; k<20; k++){
-    			double simTemp[][] = new double[wordlist1[j].length][wordlist1[k].length];
-    			System.out.println((j+1)+"ºÍ"+(k+1));
-    			for (m=0; m<wordlist1[j].length; m++){
-    				for (n=0; n<wordlist1[k].length; n++){
-    					if (wordlist1[j][m].equalsIgnoreCase(wordlist1[k][n])){
-    						simTemp[m][n] = 1.0;
-    					}
-    					else{
-    						simTemp[m][n] = simWord(wordlist1[j][m], wordlist1[k][n]);
-    					}
-    					System.out.print(simTemp[m][n]+"  ");
-    				}
-    				System.out.println();
-    			}
-    			sim[j][k] = simTemp;
-    			System.out.println();
-    		}
-    	}  */
-    	
-    	
-    	//²»Í¬Àà±ğÏàËÆ¶È½»²æ¼ÆËã
-/*    	for (j=0; j<20; j++){
-    		for (k=0; k<20; k++){
-    			double simTemp[][] = new double[wordlist1[j].length][wordlist2[k].length];
-    			System.out.println((j+1)+"ºÍ"+(k+1));
-    			for (m=0; m<wordlist1[j].length; m++){
-    				for (n=0; n<wordlist2[k].length; n++){
-    					if (wordlist1[j][m].equalsIgnoreCase(wordlist2[k][n])){
-    						simTemp[m][n] = 1.0;
-    					}
-    					else{
-    						simTemp[m][n] = simWord(wordlist1[j][m], wordlist2[k][n]);
-    					}
-    					System.out.print(simTemp[m][n]+"  ");
-    				}
-    				System.out.println();
-    			}
-    			sim[j][k] = simTemp;
-    			System.out.println();
-    		}
-    	}
-    	
-    	
-    	FileWriter rs = new FileWriter("D:/¾ÛÀà/parse/twi/difresult.txt");
-    	
-    	
-    	for (j=0; j<20; j++){
-    		for (k=0; k<20; k++){
-    			rs.write((j+1)+"ºÍ"+(k+1)+"µÄÏàËÆ¶ÈÎª£º ");
-    			rs.write(twiSim(sim[j][k])+"\r\n");
-    		}
-    	}
-    	rs.close();
-*/    	
-    	System.out.println(simWord("º½¿Õ","½»Ò×"));
-    }
+    public static void main(String[] args) {
+  		loadGlossary();
+  		System.out.println(simWord("æš—å¨¼","å“€é¸£"));
+  	}
+      
 }

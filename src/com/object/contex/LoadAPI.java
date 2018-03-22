@@ -9,6 +9,11 @@ import java.util.Map;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+/**
+ * 加载哈工大接口
+ * @author DaiYuQin
+ *
+ */
 public class LoadAPI {
 
 	public ArrayList<HaWord> load(String text ) throws IOException {
@@ -24,7 +29,7 @@ public class LoadAPI {
 	                + "text="    + text    + "&"
 	                + "format="  + format  + "&"
 	                + "pattern=" + pattern;
-//	        System.out.println(urlpath);
+	        System.out.println(urlpath);
 	       
 	        String jsoncontex = new Util().readUrl(urlpath);
 //	        System.out.println("json:");

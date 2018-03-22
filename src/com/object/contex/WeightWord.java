@@ -1,5 +1,10 @@
 package com.object.contex;
 
+/**
+ * 为各个分词分配权重属性
+ * @author DaiYuQin
+ *
+ */
 public class WeightWord {
 	String word;
 	Double weight;

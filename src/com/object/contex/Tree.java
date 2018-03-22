@@ -5,6 +5,11 @@ import java.util.ArrayList;
 
 import javax.xml.soap.Node;
 
+/**
+ * 测试如何创建树
+ * @author DaiYuQin
+ *
+ */
 public class Tree {
 
 	public static void main(String[] args) {
@@ -28,15 +33,18 @@ public class Tree {
 			nodes.add(node);
 		}
 		for(int i = 0;i<index.size();i++){
-			if(index.get(i)>0){
-//			nodes.get(i).parent = nodes.get(index.get(i));
-				if(nodes.get(index.get(i)).getLeft()==null){
-					nodes.get(index.get(i)).left = nodes.get(i);
-				}
-				else
-					nodes.get(index.get(i)).right = nodes.get(i);
+			if(index.get(i)>=0){
+			nodes.get(i).parent = nodes.get(index.get(i));
+//				if(nodes.get(index.get(i)).getLeft()==null){
+//					nodes.get(index.get(i)).left = nodes.get(i);
+//				}
+//				else
+//					nodes.get(index.get(i)).right = nodes.get(i);
 			}
 		}
+		
+		
+		
 		for(int i = 0;i<index.size();i++){
 			if(index.get(i)<0){
 				print(nodes.get(i));

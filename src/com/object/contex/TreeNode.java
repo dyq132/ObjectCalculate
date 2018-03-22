@@ -1,5 +1,9 @@
 package com.object.contex;
-
+/**
+ * 根据哈工大句法依存创建树的属性
+ * @author DaiYuQin
+ *
+ */
 
 public class TreeNode {
 	String var;
@@ -7,6 +11,17 @@ public class TreeNode {
 	TreeNode left;
 	TreeNode right;
 	TreeNode middle;
+	TreeNode parent;
+
+	public TreeNode getParent() {
+		return parent;
+	}
+
+
+	public void setParent(TreeNode parent) {
+		this.parent = parent;
+	}
+
 
 	public TreeNode(String var,Double edge) {
 		this.var = var;

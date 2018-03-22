@@ -4,15 +4,19 @@
 package com.object.similary;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.swing.text.TabableView;
 
 /**
  * 该类为此项目的主要文件，提供计算词语相似度的一些基本公式，都为静态。
@@ -83,6 +87,9 @@ public class WordSimilarity {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader("././dict/glossary.dat"));
+//        	FileInputStream fileInputStream = new FileInputStream("dict/glossary.dat");
+//			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+//			reader = new BufferedReader(inputStreamReader);
             line = reader.readLine();
             while (line != null) {
                 // parse the line
@@ -264,7 +271,7 @@ public class WordSimilarity {
             return max;
 //            return sum/(list1.size()*list2.size());
         }
-        System.out.println("其中有词没有被收录");
+//        System.out.println("其中有词没有被收录");
         return -0.0;
     }
 
@@ -309,6 +316,7 @@ public class WordSimilarity {
             // 关系符号相似度
             map1 = w1.getRelationSimbolPrimitives();
             map2 = w2.getRelationSimbolPrimitives();
+//            double sim4 = simMap(map1, map2);
             double sim4 = simMap(map1, map2);
 //            System.out.println("sim4="+sim4);
             double product = sim1;
@@ -350,7 +358,13 @@ public class WordSimilarity {
         for (String key : map1.keySet()) {
             if (map2.containsKey(key)) {
                 List<String> list1 = map1.get(key);
+//                for(int i = 0;i <list1.size();i++){
+//                	System.out.println("关系义原list1:"+list1.get(i));
+//                }
                 List<String> list2 = map2.get(key);
+//                for(int i = 0;i <list2.size();i++){
+//                	System.out.println("关系义原list2:"+list2.get(i));
+//                }
                 sim += simList(list1, list2);
                 count++;
             }
@@ -359,6 +373,9 @@ public class WordSimilarity {
                 / (total-count);
     }
 
+    
+   
+    
     /**
      * 比较两个集合的相似度
      * 
@@ -565,80 +582,80 @@ public class WordSimilarity {
         }*/
         
     	//wordArr("D:/聚类/parse/twi/character"+"/ch1.txt");
-    	String wordlist1[][] = new String[20][];
-    	
-    	for (int i=0; i<20; i++){
-    		wordlist1[i] = wordArr("D:/聚类/parse/twi/character/ch"+(i+1)+".txt");
-    		System.out.println((i+1)+"has done");
-    	}
-    	
-    	String wordlist2[][] = new String[20][];
-    	
-    	for (int i=0; i<20; i++){
-    		wordlist2[i] = wordArr("D:/聚类/parse/twi/character2/ch"+(i+1)+".txt");
-    		System.out.println((i+1)+"has done");
-    	}
-    	
-    	double sim[][][][] = new double [20][20][][];
-    	int j,k,m,n;
-    	
-    	//同一类别内相似度计算
-    	for (j=0; j<20; j++){
-    		for (k=j+1; k<20; k++){
-    			double simTemp[][] = new double[wordlist1[j].length][wordlist1[k].length];
-    			System.out.println((j+1)+"和"+(k+1));
-    			for (m=0; m<wordlist1[j].length; m++){
-    				for (n=0; n<wordlist1[k].length; n++){
-    					if (wordlist1[j][m].equalsIgnoreCase(wordlist1[k][n])){
-    						simTemp[m][n] = 1.0;
-    					}
-    					else{
-    						simTemp[m][n] = simWord(wordlist1[j][m], wordlist1[k][n]);
-    					}
-    					System.out.print(simTemp[m][n]+"  ");
-    				}
-    				System.out.println();
-    			}
-    			sim[j][k] = simTemp;
-    			System.out.println();
-    		}
-    	}  
-    	
-    	
-    	//不同类别相似度交叉计算
-    	for (j=0; j<20; j++){
-    		for (k=0; k<20; k++){
-    			double simTemp[][] = new double[wordlist1[j].length][wordlist2[k].length];
-    			System.out.println((j+1)+"和"+(k+1));
-    			for (m=0; m<wordlist1[j].length; m++){
-    				for (n=0; n<wordlist2[k].length; n++){
-    					if (wordlist1[j][m].equalsIgnoreCase(wordlist2[k][n])){
-    						simTemp[m][n] = 1.0;
-    					}
-    					else{
-    						simTemp[m][n] = simWord(wordlist1[j][m], wordlist2[k][n]);
-    					}
-    					System.out.print(simTemp[m][n]+"  ");
-    				}
-    				System.out.println();
-    			}
-    			sim[j][k] = simTemp;
-    			System.out.println();
-    		}
-    	}
-    	
-    	
-    	FileWriter rs = new FileWriter("D:/聚类/parse/twi/difresult.txt");
-    	
-    	
-    	for (j=0; j<20; j++){
-    		for (k=0; k<20; k++){
-    			rs.write((j+1)+"和"+(k+1)+"的相似度为： ");
-    			rs.write(twiSim(sim[j][k])+"\r\n");
-    		}
-    	}
-    	rs.close();
-    	
-    	//System.out.println(simWord("航空","交易"));
+//    	String wordlist1[][] = new String[20][];
+//    	
+//    	for (int i=0; i<20; i++){
+//    		wordlist1[i] = wordArr("D:/聚类/parse/twi/character/ch"+(i+1)+".txt");
+//    		System.out.println((i+1)+"has done");
+//    	}
+//    	
+//    	String wordlist2[][] = new String[20][];
+//    	
+//    	for (int i=0; i<20; i++){
+//    		wordlist2[i] = wordArr("D:/聚类/parse/twi/character2/ch"+(i+1)+".txt");
+//    		System.out.println((i+1)+"has done");
+//    	}
+//    	
+//    	double sim[][][][] = new double [20][20][][];
+//    	int j,k,m,n;
+//    	
+//    	//同一类别内相似度计算
+//    	for (j=0; j<20; j++){
+//    		for (k=j+1; k<20; k++){
+//    			double simTemp[][] = new double[wordlist1[j].length][wordlist1[k].length];
+//    			System.out.println((j+1)+"和"+(k+1));
+//    			for (m=0; m<wordlist1[j].length; m++){
+//    				for (n=0; n<wordlist1[k].length; n++){
+//    					if (wordlist1[j][m].equalsIgnoreCase(wordlist1[k][n])){
+//    						simTemp[m][n] = 1.0;
+//    					}
+//    					else{
+//    						simTemp[m][n] = simWord(wordlist1[j][m], wordlist1[k][n]);
+//    					}
+//    					System.out.print(simTemp[m][n]+"  ");
+//    				}
+//    				System.out.println();
+//    			}
+//    			sim[j][k] = simTemp;
+//    			System.out.println();
+//    		}
+//    	}  
+//    	
+//    	
+//    	//不同类别相似度交叉计算
+//    	for (j=0; j<20; j++){
+//    		for (k=0; k<20; k++){
+//    			double simTemp[][] = new double[wordlist1[j].length][wordlist2[k].length];
+//    			System.out.println((j+1)+"和"+(k+1));
+//    			for (m=0; m<wordlist1[j].length; m++){
+//    				for (n=0; n<wordlist2[k].length; n++){
+//    					if (wordlist1[j][m].equalsIgnoreCase(wordlist2[k][n])){
+//    						simTemp[m][n] = 1.0;
+//    					}
+//    					else{
+//    						simTemp[m][n] = simWord(wordlist1[j][m], wordlist2[k][n]);
+//    					}
+//    					System.out.print(simTemp[m][n]+"  ");
+//    				}
+//    				System.out.println();
+//    			}
+//    			sim[j][k] = simTemp;
+//    			System.out.println();
+//    		}
+//    	}
+//    	
+//    	
+//    	FileWriter rs = new FileWriter("D:/聚类/parse/twi/difresult.txt");
+//    	
+//    	
+//    	for (j=0; j<20; j++){
+//    		for (k=0; k<20; k++){
+//    			rs.write((j+1)+"和"+(k+1)+"的相似度为： ");
+//    			rs.write(twiSim(sim[j][k])+"\r\n");
+//    		}
+//    	}
+//    	rs.close();
+    	loadGlossary();
+    	System.out.println(simWord("航空","交易"));
     }
 }
